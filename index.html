@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reseller Profit Calculator – eBay, Poshmark &amp; Mercari Fees</title>
+<meta name="description" content="Free reseller profit calculator. See your net profit, margin, ROI and break-even price after eBay, Poshmark and Mercari fees. Edit every fee rate to match your account.">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --card: #ffffff;
+    --ink: #1c1b18;
+    --muted: #615f58;
+    --line: #dedbd2;
+    --accent: #0b6b57;
+    --accent-ink: #ffffff;
+    --good: #0b6b57;
+    --bad: #b42318;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141412;
+      --card: #1e1e1b;
+      --ink: #f1efe8;
+      --muted: #aaa79c;
+      --line: #36352f;
+      --accent: #3ecfae;
+      --accent-ink: #0d1f1a;
+      --good: #3ecfae;
+      --bad: #ff8a7a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.6rem; line-height: 1.2; margin: 0 0 6px; }
+  h2 { font-size: 1.15rem; margin: 32px 0 8px; }
+  p { margin: 0 0 12px; }
+  .sub { color: var(--muted); margin-bottom: 20px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tabs button {
+    flex: 1 1 auto;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    border-radius: 10px;
+    font: inherit;
+    cursor: pointer;
+  }
+  .tabs button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-color: var(--accent);
+    font-weight: 600;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+  label { display: block; font-size: .9rem; color: var(--muted); margin-bottom: 4px; }
+  input[type="number"] {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+  }
+  input:disabled { opacity: .5; }
+  .check { display: flex; gap: 8px; align-items: center; margin-top: 8px; color: var(--ink); font-size: .95rem; }
+  .check input { width: 20px; height: 20px; }
+  .result { text-align: center; }
+  .big { font-size: 2.2rem; font-weight: 700; line-height: 1.1; margin: 4px 0 2px; }
+  .big.pos { color: var(--good); }
+  .big.neg { color: var(--bad); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; }
+  .stat { border: 1px solid var(--line); border-radius: 10px; padding: 8px 4px; }
+  .stat b { display: block; font-size: 1.05rem; }
+  .stat span { font-size: .8rem; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: .95rem; }
+  td { padding: 6px 0; border-top: 1px solid var(--line); }
+  td:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+  details summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+  .hint { font-size: .85rem; color: var(--muted); }
+  .cta {
+    display: inline-block;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    text-decoration: none;
+    font-weight: 600;
+    min-height: 44px;
+  }
+  footer { color: var(--muted); font-size: .85rem; margin-top: 32px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Reseller Profit Calculator</h1>
+  <p class="sub">See what you really keep after eBay, Poshmark or Mercari fees. Net profit, margin, ROI and break-even price in seconds. Everything runs in your browser, nothing is sent anywhere.</p>
+
+  <div class="tabs" role="group" aria-label="Marketplace" id="tabs"></div>
+
+  <section class="card" aria-label="Your numbers">
+    <div class="grid">
+      <div><label for="price">Sale price ($)</label><input id="price" type="number" inputmode="decimal" min="0" step="0.01" value="45"></div>
+      <div><label for="cost">What you paid for the item ($)</label><input id="cost" type="number" inputmode="decimal" min="0" step="0.01" value="10"></div>
+      <div><label for="shipCharged">Shipping you charge the buyer ($)</label><input id="shipCharged" type="number" inputmode="decimal" min="0" step="0.01" value="0"></div>
+      <div><label for="shipCost">Your real shipping cost ($)</label><input id="shipCost" type="number" inputmode="decimal" min="0" step="0.01" value="0"></div>
+      <div><label for="pack">Packaging and other costs ($)</label><input id="pack" type="number" inputmode="decimal" min="0" step="0.01" value="0"></div>
+    </div>
+    <p class="hint" id="platformNote" style="margin-top:12px"></p>
+  </section>
+
+  <section class="card result" aria-live="polite" aria-label="Result">
+    <div class="hint">Net profit</div>
+    <div class="big" id="profit">$0.00</div>
+    <div class="stats">
+      <div class="stat"><b id="margin">0%</b><span>Margin</span></div>
+      <div class="stat"><b id="roi">0%</b><span>ROI</span></div>
+      <div class="stat"><b id="breakeven">$0.00</b><span>Break-even price</span></div>
+    </div>
+    <table>
+      <tr><td>Revenue (price + shipping charged)</td><td id="rRevenue"></td></tr>
+      <tr><td>Marketplace fees</td><td id="rFees"></td></tr>
+      <tr><td>Item cost</td><td id="rCost"></td></tr>
+      <tr><td>Shipping and other costs</td><td id="rOther"></td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Edit fee rates for your account</summary>
+      <p class="hint" style="margin-top:10px">Defaults are typical standard rates. Your category, store plan or seller level can change them, so adjust the values below. Your settings are saved on this device only.</p>
+      <div class="grid">
+        <div><label for="pct">Fee percentage (%)</label><input id="pct" type="number" inputmode="decimal" min="0" step="0.01"></div>
+        <div><label for="fixed">Fixed fee per order ($)</label><input id="fixed" type="number" inputmode="decimal" min="0" step="0.01"></div>
+        <div><label for="threshold">Flat-fee threshold ($, 0 = off)</label><input id="threshold" type="number" inputmode="decimal" min="0" step="0.01"></div>
+        <div><label for="flatUnder">Flat fee below threshold ($)</label><input id="flatUnder" type="number" inputmode="decimal" min="0" step="0.01"></div>
+      </div>
+      <label class="check"><input id="includeShip" type="checkbox"> Percentage also applies to the shipping you charge</label>
+      <p class="hint" style="margin-top:10px"><button type="button" id="reset" style="min-height:44px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;cursor:pointer">Reset to default rates</button></p>
+    </details>
+  </section>
+
+  <section class="card">
+    <p><b>Want this on every listing?</b> A Chrome extension is coming that shows your profit directly on the product page.</p>
+    <!-- TODO: replace # with the Chrome Web Store link when published -->
+    <a class="cta" href="#" id="cta">Chrome extension coming soon</a>
+  </section>
+
+  <h2>How the calculation works</h2>
+  <p><b>Net profit</b> = sale price + shipping charged to the buyer − marketplace fees − item cost − your shipping cost − packaging and other costs.</p>
+  <p><b>Margin</b> = net profit ÷ revenue. <b>ROI</b> = net profit ÷ everything you spent on the item. <b>Break-even price</b> is the lowest sale price at which your net profit is zero with the numbers above.</p>
+  <h2>About the default fees</h2>
+  <p><b>eBay (US):</b> a percentage of the total sale (item plus shipping) plus a small per-order fee. Reported standard rates for most categories vary between sources, so check eBay's current fee page and edit the percentage above. <b>Poshmark (US):</b> a flat fee on sales under $15 and a percentage at $15 and above; the buyer pays shipping separately. <b>Mercari (US):</b> a percentage of the item price plus buyer-paid shipping.</p>
+
+  <footer>
+    <p>Estimates only, not tax or financial advice. Fees change often and vary by category, country and seller plan, so confirm them on each marketplace before you price. Sales tax, promoted listings, returns and currency conversion are not included. Default rates last reviewed in November 2026. This is an independent tool, not affiliated with or endorsed by eBay, Poshmark or Mercari.</p>
+  </footer>
+</main>
+
+<script>
+(function (root) {
+  'use strict';
+
+  var PRESETS = {
+    ebay: { name: 'eBay (US)', pct: 13.6, fixed: 0.40, fixedLow: 0.30, lowLimit: 10, includeShip: true, threshold: 0, flatUnder: 0, noShipping: false,
+      note: 'eBay also charges a smaller per-order fee ($0.30 instead of $0.40) on orders of $10 or less. Editing the fixed fee below replaces both.' },
+    poshmark: { name: 'Poshmark (US)', pct: 20, fixed: 0, fixedLow: null, lowLimit: 0, includeShip: false, threshold: 15, flatUnder: 2.95, noShipping: true,
+      note: 'On Poshmark the buyer pays the shipping label separately, so the shipping fields are turned off.' },
+    mercari: { name: 'Mercari (US)', pct: 10, fixed: 0, fixedLow: null, lowLimit: 0, includeShip: true, threshold: 0, flatUnder: 0, noShipping: false,
+      note: 'Mercari applies its selling fee to the item price plus buyer-paid shipping.' },
+    custom: { name: 'Custom', pct: 10, fixed: 0, fixedLow: null, lowLimit: 0, includeShip: false, threshold: 0, flatUnder: 0, noShipping: false,
+      note: 'Set your own fee rates in "Edit fee rates for your account".' }
+  };
+
+  function num(v) {
+    var n = parseFloat(v);
+    return isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function feeFor(price, shipCharged, cfg) {
+    var base = price + (cfg.includeShip ? shipCharged : 0);
+    if (cfg.threshold > 0 && price < cfg.threshold) {
+      return cfg.flatUnder;
+    }
+    var fixed = (cfg.fixedLow !== null && cfg.fixedLow !== undefined && base <= cfg.lowLimit) ? cfg.fixedLow : cfg.fixed;
+    return base * cfg.pct / 100 + fixed;
+  }
+
+  function compute(inp, cfg) {
+    var shipCharged = cfg.noShipping ? 0 : inp.shipCharged;
+    var shipCost = cfg.noShipping ? 0 : inp.shipCost;
+    var revenue = inp.price + shipCharged;
+    var fees = feeFor(inp.price, shipCharged, cfg);
+    var other = shipCost + inp.pack;
+    var spent = inp.cost + other;
+    var profit = revenue - fees - inp.cost - other;
+    return {
+      revenue: revenue,
+      fees: fees,
+      other: other,
+      profit: profit,
+      margin: revenue > 0 ? profit / revenue * 100 : 0,
+      roi: spent > 0 ? profit / spent * 100 : 0
+    };
+  }
+
+  function breakeven(inp, cfg) {
+    function profitAt(p) {
+      return compute({ price: p, cost: inp.cost, shipCharged: inp.shipCharged, shipCost: inp.shipCost, pack: inp.pack }, cfg).profit;
+    }
+    if (profitAt(0) >= 0) { return 0; }
+    var lo = 0, hi = 100000;
+    if (profitAt(hi) < 0) { return null; }
+    for (var i = 0; i < 80; i++) {
+      var mid = (lo + hi) / 2;
+      if (profitAt(mid) < 0) { lo = mid; } else { hi = mid; }
+    }
+    return hi;
+  }
+
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { PRESETS: PRESETS, feeFor: feeFor, compute: compute, breakeven: breakeven };
+  }
+
+  if (typeof document === 'undefined') { return; }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+  var STORE_KEY = 'rpc.v1';
+  var state = { platform: 'ebay', cfgs: {} };
+
+  try {
+    var saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null');
+    if (saved && PRESETS[saved.platform]) { state.platform = saved.platform; state.cfgs = saved.cfgs || {}; }
+  } catch (e) { /* storage unavailable: run without saving */ }
+
+  function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  function currentCfg() {
+    var base = JSON.parse(JSON.stringify(PRESETS[state.platform]));
+    var over = state.cfgs[state.platform];
+    if (over) { for (var k in over) { base[k] = over[k]; } }
+    return base;
+  }
+
+  function readInputs() {
+    return { price: num($('price').value), cost: num($('cost').value), shipCharged: num($('shipCharged').value), shipCost: num($('shipCost').value), pack: num($('pack').value) };
+  }
+
+  function writeCfgFields(cfg) {
+    $('pct').value = cfg.pct;
+    $('fixed').value = cfg.fixed;
+    $('threshold').value = cfg.threshold;
+    $('flatUnder').value = cfg.flatUnder;
+    $('includeShip').checked = cfg.includeShip;
+  }
+
+  function readCfgFields() {
+    var cfg = currentCfg();
+    var fixedNow = num($('fixed').value);
+    var over = {
+      pct: num($('pct').value),
+      fixed: fixedNow,
+      threshold: num($('threshold').value),
+      flatUnder: num($('flatUnder').value),
+      includeShip: $('includeShip').checked
+    };
+    if (fixedNow !== cfg.fixed) { over.fixedLow = null; }
+    state.cfgs[state.platform] = Object.assign({}, state.cfgs[state.platform] || {}, over);
+  }
+
+  function render() {
+    var cfg = currentCfg();
+    var inp = readInputs();
+    var r = compute(inp, cfg);
+    var be = breakeven(inp, cfg);
+    $('profit').textContent = money.format(r.profit);
+    $('profit').className = 'big ' + (r.profit >= 0 ? 'pos' : 'neg');
+    $('margin').textContent = r.margin.toFixed(1) + '%';
+    $('roi').textContent = r.roi.toFixed(1) + '%';
+    $('breakeven').textContent = be === null ? 'n/a' : money.format(be);
+    $('rRevenue').textContent = money.format(r.revenue);
+    $('rFees').textContent = '−' + money.format(r.fees);
+    $('rCost').textContent = '−' + money.format(inp.cost);
+    $('rOther').textContent = '−' + money.format(r.other);
+    $('shipCharged').disabled = cfg.noShipping;
+    $('shipCost').disabled = cfg.noShipping;
+    $('platformNote').textContent = cfg.note;
+    var tabs = $('tabs').children;
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].setAttribute('aria-pressed', tabs[i].getAttribute('data-key') === state.platform ? 'true' : 'false');
+    }
+  }
+
+  Object.keys(PRESETS).forEach(function (key) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.setAttribute('data-key', key);
+    b.textContent = PRESETS[key].name;
+    b.addEventListener('click', function () {
+      state.platform = key;
+      writeCfgFields(currentCfg());
+      save();
+      render();
+    });
+    $('tabs').appendChild(b);
+  });
+
+  ['price', 'cost', 'shipCharged', 'shipCost', 'pack'].forEach(function (id) {
+    $(id).addEventListener('input', render);
+  });
+  ['pct', 'fixed', 'threshold', 'flatUnder', 'includeShip'].forEach(function (id) {
+    $(id).addEventListener('input', function () { readCfgFields(); save(); render(); });
+  });
+  $('reset').addEventListener('click', function () {
+    delete state.cfgs[state.platform];
+    writeCfgFields(currentCfg());
+    save();
+    render();
+  });
+  $('cta').addEventListener('click', function (e) {
+    if ($('cta').getAttribute('href') === '#') { e.preventDefault(); }
+  });
+
+  writeCfgFields(currentCfg());
+  render();
+})(typeof window !== 'undefined' ? window : this);
+</script>
+</body>
+</html>
